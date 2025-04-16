@@ -1,0 +1,200 @@
+# PDF Utility Backend API
+
+A Flask-based RESTful API for PDF manipulation operations including conversion, merging, and extraction. This document provides comprehensive guidance on how to integrate with this backend service from your frontend application.
+
+## Table of Contents
+- [API Endpoints](#api-endpoints)
+- [Setup Requirements](#setup-requirements)
+- [Authentication](#authentication)
+- [Error Handling](#error-handling)
+- [Sample Frontend Integration](#sample-frontend-integration)
+
+## API Endpoints
+
+### 1. PDF to Images Conversion
+Converts a PDF file into individual JPG images, one per page.
+
+**Endpoint:** `/pdf-to-images`  
+**Method:** `POST`  
+**Content-Type:** `multipart/form-data`
+
+**Request:**
+- Form field `file`: A single PDF file to convert
+
+**Response:**
+- **Success (200 OK):**
+  ```json
+  {
+    "message": "PDF converted to images successfully",
+    "images": [
+      "uploads/document.pdf_page_1.jpg",
+      "uploads/document.pdf_page_2.jpg",
+      "..."
+    ]
+  }
+  ```
+- **Error (400 Bad Request or 500 Internal Server Error):**
+  ```json
+  {
+    "error": "Error message explanation"
+  }
+  ```
+
+### 2. Word to PDF Conversion
+Converts Microsoft Word documents (.docx or .doc) to PDF format.
+
+**Endpoint:** `/word-to-pdf`  
+**Method:** `POST`  
+**Content-Type:** `multipart/form-data`
+
+**Request:**
+- Form field `file`: A single Word document (.docx or .doc)
+
+**Response:**
+- **Success (200 OK):** Returns the converted PDF file as an attachment
+- **Error (400 Bad Request or 500 Internal Server Error):**
+  ```json
+  {
+    "error": "Error message explanation"
+  }
+  ```
+
+### 3. Images to PDF Conversion
+Combines multiple images into a single PDF file.
+
+**Endpoint:** `/images-to-pdf`  
+**Method:** `POST`  
+**Content-Type:** `multipart/form-data`
+
+**Request:**
+- Form field `files`: Multiple image files (jpg, jpeg, png)
+
+**Response:**
+- **Success (200 OK):** Returns the generated PDF file as an attachment
+- **Error (400 Bad Request or 500 Internal Server Error):**
+  ```json
+  {
+    "error": "Error message explanation"
+  }
+  ```
+
+### 4. Merge PDFs
+Combines multiple PDF files into a single PDF document.
+
+**Endpoint:** `/merge-pdfs`  
+**Method:** `POST`  
+**Content-Type:** `multipart/form-data`
+
+**Request:**
+- Form field `files`: Multiple PDF files to be merged
+
+**Response:**
+- **Success (200 OK):** Returns the merged PDF file as an attachment
+- **Error (400 Bad Request or 500 Internal Server Error):**
+  ```json
+  {
+    "error": "Error message explanation"
+  }
+  ```
+
+## Setup Requirements
+
+The backend requires certain dependencies on the server:
+
+- For Linux: LibreOffice must be installed for Word to PDF conversion
+- For Windows: No additional software required (uses docx2pdf)
+
+## Authentication
+
+This API currently does not implement authentication. If deploying to production, consider implementing an authentication mechanism such as API keys or JWT.
+
+## Error Handling
+
+The API returns appropriate HTTP status codes:
+
+- `200 OK`: The request was successful
+- `400 Bad Request`: The request was malformed or missing required files
+- `500 Internal Server Error`: An error occurred while processing the request
+
+All error responses include a JSON object with an `error` field describing the issue.
+
+## Sample Frontend Integration
+
+### Example using Fetch API (JavaScript)
+
+```javascript
+// Example: Converting PDF to images
+async function convertPdfToImages(pdfFile) {
+  const formData = new FormData();
+  formData.append('file', pdfFile);
+  
+  try {
+    const response = await fetch('http://your-backend-url/pdf-to-images', {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Unknown error occurred');
+    }
+    
+    const data = await response.json();
+    return data.images; // Array of image paths
+  } catch (error) {
+    console.error('Error converting PDF to images:', error);
+    throw error;
+  }
+}
+
+// Example: Converting Word to PDF
+async function convertWordToPdf(wordFile) {
+  const formData = new FormData();
+  formData.append('file', wordFile);
+  
+  try {
+    const response = await fetch('http://your-backend-url/word-to-pdf', {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Unknown error occurred');
+    }
+    
+    const blob = await response.blob();
+    return URL.createObjectURL(blob); // Create a URL for the PDF file
+  } catch (error) {
+    console.error('Error converting Word to PDF:', error);
+    throw error;
+  }
+}
+```
+
+### Example using Axios (JavaScript)
+
+```javascript
+// Example: Merging multiple PDFs
+async function mergePdfs(pdfFiles) {
+  const formData = new FormData();
+  
+  pdfFiles.forEach(file => {
+    formData.append('files', file);
+  });
+  
+  try {
+    const response = await axios.post('http://your-backend-url/merge-pdfs', formData, {
+      responseType: 'blob',
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    
+    return URL.createObjectURL(new Blob([response.data]));
+  } catch (error) {
+    console.error('Error merging PDFs:', error);
+    throw error;
+  }
+}
+```
