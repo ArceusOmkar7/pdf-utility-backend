@@ -19,7 +19,7 @@ except ImportError:
     env_loaded = False
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, 
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     handlers=[logging.StreamHandler()])
 logger = logging.getLogger(__name__)
@@ -27,7 +27,8 @@ logger = logging.getLogger(__name__)
 if env_loaded:
     logger.info("Loaded environment variables from .env file")
 else:
-    logger.info("dotenv not installed or .env file not found. Using default environment variables.")
+    logger.info(
+        "dotenv not installed or .env file not found. Using default environment variables.")
 
 # Check for required packages
 try:
@@ -36,7 +37,8 @@ try:
     from PyPDF2 import PdfMerger
 except ImportError as e:
     logger.error(f"Missing required dependency: {str(e)}")
-    logger.error("Please install all required packages: pip install -r requirements.txt")
+    logger.error(
+        "Please install all required packages: pip install -r requirements.txt")
     sys.exit(1)
 
 # Initialize Flask app
@@ -45,7 +47,8 @@ CORS(app)
 
 # Environment configuration
 UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', 'uploads')
-MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 10 * 1024 * 1024))  # Default 10MB
+MAX_CONTENT_LENGTH = int(os.environ.get(
+    'MAX_CONTENT_LENGTH', 10 * 1024 * 1024))  # Default 10MB
 DEBUG_MODE = os.environ.get('DEBUG_MODE', 'False').lower() == 'true'
 PORT = int(os.environ.get('PORT', 5000))
 HOST = os.environ.get('HOST', '127.0.0.1')
@@ -64,6 +67,7 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 ALLOWED_EXTENSIONS = {'pdf', 'docx', 'doc', 'jpg', 'jpeg', 'png'}
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -71,15 +75,17 @@ def allowed_file(filename):
 def convert_docx_to_pdf(input_path, output_path):
     """Platform-specific Word to PDF conversion"""
     logger.info(f"Converting {input_path} to {output_path}")
-    
+
     if platform.system() == 'Windows':
         try:
             from docx2pdf import convert
             convert(input_path, output_path)
             return True
         except ImportError:
-            logger.error("docx2pdf package is missing. Install with: pip install docx2pdf")
-            raise Exception("Missing docx2pdf package. Please install it with 'pip install docx2pdf'")
+            logger.error(
+                "docx2pdf package is missing. Install with: pip install docx2pdf")
+            raise Exception(
+                "Missing docx2pdf package. Please install it with 'pip install docx2pdf'")
         except Exception as e:
             logger.error(f"Windows conversion error: {str(e)}")
             raise Exception(f"Windows conversion error: {str(e)}")
@@ -97,11 +103,11 @@ def convert_docx_to_pdf(input_path, output_path):
                     if os.path.exists(path):
                         libreoffice_cmd = path
                         break
-            
-            libreoffice_check = subprocess.run(['which', libreoffice_cmd], 
-                                             stdout=subprocess.PIPE, 
-                                             stderr=subprocess.PIPE)
-            
+
+            libreoffice_check = subprocess.run(['which', libreoffice_cmd],
+                                               stdout=subprocess.PIPE,
+                                               stderr=subprocess.PIPE)
+
             if libreoffice_check.returncode != 0:
                 error_message = "LibreOffice is not installed or not in PATH. "
                 if platform.system() == 'Linux':
@@ -109,27 +115,29 @@ def convert_docx_to_pdf(input_path, output_path):
                 elif platform.system() == 'Darwin':
                     error_message += "Please install it from https://www.libreoffice.org/download/download-libreoffice/"
                 raise Exception(error_message)
-            
+
             # Use LibreOffice for conversion
             output_dir = os.path.dirname(output_path)
-            subprocess.run([libreoffice_cmd, '--headless', '--convert-to', 'pdf', 
-                           '--outdir', output_dir, input_path], 
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+            subprocess.run([libreoffice_cmd, '--headless', '--convert-to', 'pdf',
+                           '--outdir', output_dir, input_path],
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                            check=True)
-            
+
             # LibreOffice saves with the same name but .pdf extension
             base_name = os.path.basename(input_path)
             pdf_name = os.path.splitext(base_name)[0] + '.pdf'
             expected_path = os.path.join(output_dir, pdf_name)
-            
+
             # Rename if needed
             if expected_path != output_path and os.path.exists(expected_path):
                 os.rename(expected_path, output_path)
-                
+
             return True
         except subprocess.CalledProcessError as e:
-            logger.error(f"LibreOffice conversion error: {e.stderr.decode('utf-8') if e.stderr else str(e)}")
-            raise Exception(f"LibreOffice conversion error: {e.stderr.decode('utf-8') if e.stderr else str(e)}")
+            logger.error(
+                f"LibreOffice conversion error: {e.stderr.decode('utf-8') if e.stderr else str(e)}")
+            raise Exception(
+                f"LibreOffice conversion error: {e.stderr.decode('utf-8') if e.stderr else str(e)}")
         except Exception as e:
             logger.error(f"Conversion error: {str(e)}")
             raise Exception(f"Conversion error: {str(e)}")
@@ -142,11 +150,16 @@ def index():
         'name': 'PDF Utility Backend',
         'version': '1.0.0',
         'endpoints': [
-            {'path': '/', 'methods': ['GET'], 'description': 'API information'},
-            {'path': '/pdf-to-images', 'methods': ['POST', 'OPTIONS'], 'description': 'Convert PDF to images'},
-            {'path': '/word-to-pdf', 'methods': ['POST', 'OPTIONS'], 'description': 'Convert Word documents to PDF'},
-            {'path': '/images-to-pdf', 'methods': ['POST', 'OPTIONS'], 'description': 'Convert images to PDF'},
-            {'path': '/merge-pdfs', 'methods': ['POST', 'OPTIONS'], 'description': 'Merge multiple PDFs into one'}
+            {'path': '/', 'methods': ['GET'],
+                'description': 'API information'},
+            {'path': '/pdf-to-images',
+                'methods': ['POST', 'OPTIONS'], 'description': 'Convert PDF to images'},
+            {'path': '/word-to-pdf', 'methods': ['POST', 'OPTIONS'],
+                'description': 'Convert Word documents to PDF'},
+            {'path': '/images-to-pdf',
+                'methods': ['POST', 'OPTIONS'], 'description': 'Convert images to PDF'},
+            {'path': '/merge-pdfs', 'methods': ['POST', 'OPTIONS'],
+                'description': 'Merge multiple PDFs into one'}
         ],
         'status': 'operational'
     }
@@ -159,7 +172,7 @@ def pdf_to_images():
     # Handle OPTIONS request for CORS preflight
     if request.method == 'OPTIONS':
         return '', 200
-        
+
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
@@ -176,17 +189,17 @@ def pdf_to_images():
             # Convert PDF to images
             images = convert_from_path(filepath)
             image_paths = []
-            
+
             # Base name for the files without extension
             base_name = os.path.splitext(filename)[0]
-            
+
             # Create images and save them
             for i, image in enumerate(images):
                 image_path = os.path.join(
                     app.config['UPLOAD_FOLDER'], f'{base_name}_page_{i+1}.jpg')
                 image.save(image_path, 'JPEG')
                 image_paths.append(image_path)
-            
+
             # Create a ZIP file in memory
             memory_file = io.BytesIO()
             with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -194,15 +207,15 @@ def pdf_to_images():
                     # Add each image to the ZIP with a simple name
                     arcname = f'page_{i+1}.jpg'
                     zipf.write(path, arcname)
-            
+
             # Reset the memory file position to the beginning
             memory_file.seek(0)
-            
+
             # Clean up original images after adding to zip
             for path in image_paths:
                 if os.path.exists(path):
                     os.remove(path)
-            
+
             # Send the ZIP file as attachment
             return send_file(
                 memory_file,
@@ -227,7 +240,7 @@ def word_to_pdf():
     # Handle OPTIONS request for CORS preflight
     if request.method == 'OPTIONS':
         return '', 200
-        
+
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
@@ -246,13 +259,26 @@ def word_to_pdf():
                 app.config['UPLOAD_FOLDER'], f'{os.path.splitext(filename)[0]}.pdf')
             convert_docx_to_pdf(filepath, pdf_path)
 
-            return send_file(pdf_path, as_attachment=True)
+            # Clean up the Word document before sending the PDF
+            if os.path.exists(filepath):
+                os.remove(filepath)
+
+            # Return the PDF file without trying to delete it immediately
+            return send_file(
+                pdf_path,
+                as_attachment=True,
+                download_name=os.path.basename(pdf_path)
+            )
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
-        finally:
-            os.remove(filepath)
+            # Clean up files in case of an error
+            if os.path.exists(filepath):
+                os.remove(filepath)
             if os.path.exists(pdf_path):
-                os.remove(pdf_path)
+                try:
+                    os.remove(pdf_path)
+                except:
+                    pass
+            return jsonify({'error': str(e)}), 500
 
     return jsonify({'error': 'Invalid file type'}), 400
 
@@ -263,7 +289,7 @@ def images_to_pdf():
     # Handle OPTIONS request for CORS preflight
     if request.method == 'OPTIONS':
         return '', 200
-        
+
     if 'images' not in request.files:
         return jsonify({'error': 'No files part'}), 400
 
@@ -272,6 +298,7 @@ def images_to_pdf():
         return jsonify({'error': 'No selected files'}), 400
 
     image_paths = []
+    pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], 'output.pdf')
     try:
         for file in files:
             if file and allowed_file(file.filename) and file.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
@@ -284,20 +311,32 @@ def images_to_pdf():
             return jsonify({'error': 'No valid image files'}), 400
 
         # Convert images to PDF
-        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], 'output.pdf')
         with open(pdf_path, "wb") as f:
             f.write(img2pdf.convert(image_paths))
 
-        return send_file(pdf_path, as_attachment=True)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    finally:
+        # Clean up the image files before sending the PDF
         for path in image_paths:
             if os.path.exists(path):
                 os.remove(path)
-        if 'pdf_path' in locals() and os.path.exists(pdf_path):
-            os.remove(pdf_path)
 
+        return send_file(
+            pdf_path,
+            as_attachment=True,
+            download_name="combined_images.pdf"
+        )
+    except Exception as e:
+        # Clean up all files in case of error
+        for path in image_paths:
+            if os.path.exists(path):
+                os.remove(path)
+        if os.path.exists(pdf_path):
+            try:
+                os.remove(pdf_path)
+            except:
+                pass
+        return jsonify({'error': str(e)}), 500
+
+    return jsonify({'error': 'Invalid request'}), 400
 
 
 @app.route('/merge-pdfs', methods=['POST', 'OPTIONS'])
@@ -306,7 +345,7 @@ def merge_pdfs():
     # Handle OPTIONS request for CORS preflight
     if request.method == 'OPTIONS':
         return '', 200
-        
+
     if 'pdfs' not in request.files:
         return jsonify({'error': 'No files part'}), 400
 
@@ -335,15 +374,27 @@ def merge_pdfs():
         merger.write(output_path)
         merger.close()
 
-        return send_file(output_path, as_attachment=True)
+        # Clean up the individual PDF files before sending the merged PDF
+        for path in pdf_paths:
+            if os.path.exists(path):
+                os.remove(path)
+
+        return send_file(
+            output_path,
+            as_attachment=True,
+            download_name="merged.pdf"
+        )
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    finally:
+        # Clean up all files in case of error
         for path in pdf_paths:
             if os.path.exists(path):
                 os.remove(path)
         if os.path.exists(output_path):
-            os.remove(output_path)
+            try:
+                os.remove(output_path)
+            except:
+                pass
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':

@@ -161,7 +161,7 @@ Combines multiple images into a single PDF document.
 **Content-Type:** `multipart/form-data`
 
 **Request:**
-- Form field `files`: Multiple image files (jpg, jpeg, png)
+- Form field `images`: Multiple image files (jpg, jpeg, png)
 
 **Response:**
 - Success (200 OK): Returns the PDF file as attachment
@@ -180,7 +180,7 @@ Combines multiple PDF files into a single PDF document.
 **Content-Type:** `multipart/form-data`
 
 **Request:**
-- Form field `files`: Multiple PDF files
+- Form field `pdfs`: Multiple PDF files
 
 **Response:**
 - Success (200 OK): Returns the merged PDF file as attachment
