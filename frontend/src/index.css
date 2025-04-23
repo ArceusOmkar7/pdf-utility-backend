@@ -1,0 +1,36 @@
+/* Basic Reset & Defaults */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Apply a standard font stack - Ionic likely overrides parts of this */
+html {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Ensure html and body can take full height for SPA layouts */
+  height: 100%;
+}
+
+body {
+  /* Ensure body takes at least full height */
+  min-height: 100%;
+  /* Ionic themes usually handle background colors */
+}
+
+/* Ensure the root element where React mounts takes full height */
+#root {
+  height: 100%;
+  /* You might make this a flex container if needed for overall layout */
+  /* display: flex; */
+  /* flex-direction: column; */
+}
+
+/* Add any other global base styles or very simple utility classes here. */
+/* Avoid component-specific styles in this file. */
