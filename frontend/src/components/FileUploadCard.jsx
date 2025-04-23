@@ -1,6 +1,7 @@
-"use client"
+// frontend/src/components/FileUploadCard.jsx (Complete, Updated with Tailwind and Fixes)
+"use client" // Keep this if using Next.js App Router, otherwise remove if standard Vite
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   IonCard,
   IonCardHeader,
@@ -13,254 +14,243 @@ import {
   IonItem,
   IonLabel,
   IonText,
-} from "@ionic/react"
-import { cloudUploadOutline, downloadOutline, closeCircleOutline } from "ionicons/icons"
+} from "@ionic/react";
+import { cloudUploadOutline, downloadOutline, closeCircleOutline } from "ionicons/icons";
 
-// FileUploadCard.jsx - Corrected line
+// Use Vite's way to access environment variables, prefixed with VITE_
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const FileUploadCard = ({ title, endpoint, acceptedFiles, multiple = false, instructions }) => {
-  const [files, setFiles] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [downloadUrl, setDownloadUrl] = useState(null)
-  const [showToast, setShowToast] = useState(false)
-  const [toastMessage, setToastMessage] = useState("")
-  const [toastColor, setToastColor] = useState("medium") // Default toast color
+  const [files, setFiles] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [downloadInfo, setDownloadInfo] = useState(null); // Store { url, filename }
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastColor, setToastColor] = useState("medium");
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
     if (!multiple && selectedFiles.length > 1) {
-        // If multiple is false, only take the first file
-        setFiles([selectedFiles[0]]);
-        setToastMessage("Only one file can be selected for this operation.");
-        setToastColor("warning");
-        setShowToast(true);
+      setFiles([selectedFiles[0]]);
+      setToastMessage("Only one file can be selected for this operation.");
+      setToastColor("warning");
+      setShowToast(true);
     } else {
-        setFiles(selectedFiles);
+      setFiles(selectedFiles);
     }
-    setDownloadUrl(null) // Clear previous download link
-    // Clear the file input value to allow selecting the same file again after clearing
-    e.target.value = null;
-  }
+    setDownloadInfo(null); // Clear previous download info
+    e.target.value = null; // Allow selecting the same file again after clearing
+  };
 
   const handleSubmit = async () => {
     if (files.length === 0) {
-      setToastMessage("Please select file(s) to upload")
-      setToastColor("warning")
-      setShowToast(true)
-      return
+      setToastMessage("Please select file(s) to upload");
+      setToastColor("warning");
+      setShowToast(true);
+      return;
     }
 
-    setIsLoading(true)
-    setDownloadUrl(null)
-    setToastMessage(""); // Clear previous toast
+    setIsLoading(true);
+    setDownloadInfo(null);
+    setToastMessage("");
 
     try {
-      const formData = new FormData()
-
-      // --- CHANGE 1: Determine correct field name ---
+      const formData = new FormData();
       let fieldName;
+
       if (multiple) {
-          // Backend expects 'images' or 'pdfs' for multiple files
-          if (endpoint === '/images-to-pdf') {
-              fieldName = 'images';
-          } else if (endpoint === '/merge-pdfs') {
-              fieldName = 'pdfs';
-          } else {
-              // Fallback or error if endpoint doesn't match expected multiple types
-              console.error("Unknown endpoint for multiple file upload:", endpoint);
-              setToastMessage("Configuration error: Unknown endpoint for multiple files.");
-              setToastColor("danger");
-              setShowToast(true);
-              setIsLoading(false);
-              return; // Stop processing
-          }
-          files.forEach((file) => {
-              formData.append(fieldName, file); // Use the determined fieldName
-          });
+        if (endpoint === '/images-to-pdf') {
+          fieldName = 'images';
+        } else if (endpoint === '/merge-pdfs') {
+          fieldName = 'pdfs';
+        } else {
+          console.error("Unknown endpoint for multiple file upload:", endpoint);
+          throw new Error("Configuration error: Unknown endpoint for multiple files.");
+        }
+        files.forEach((file) => {
+          formData.append(fieldName, file);
+        });
       } else {
-          // Backend expects 'file' for single file uploads
-          fieldName = 'file';
-          formData.append(fieldName, files[0]);
+        fieldName = 'file';
+        formData.append(fieldName, files[0]);
       }
-      // --- End CHANGE 1 ---
 
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
         body: formData,
-      })
+      });
 
-      // --- CHANGE 2: Improved Error Handling ---
       if (!response.ok) {
-          let errorMessage = `Server Error: ${response.status} ${response.statusText}`;
-          try {
-              // Try to parse the JSON error message from the backend
-              const errorData = await response.json();
-              if (errorData && errorData.error) {
-                  errorMessage = errorData.error; // Use backend's specific error
-              }
-          } catch (parseError) {
-              // If response body is not JSON or empty, stick with the status text
-              console.warn("Could not parse error response as JSON:", parseError);
+        let errorMessage = `Server Error: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.error) {
+            errorMessage = errorData.error;
           }
-          throw new Error(errorMessage); // Throw the specific or generic error message
+        } catch (parseError) {
+          console.warn("Could not parse error response as JSON:", parseError);
+        }
+        throw new Error(errorMessage);
       }
-      // --- End CHANGE 2 ---
 
-      // If response is OK, expect a file blob
-      const blob = await response.blob()
-
-      // --- CHANGE 3: Rely on Content-Disposition for filename ---
-      // Get filename from Content-Disposition header if available
+      const blob = await response.blob();
       const contentDisposition = response.headers.get('content-disposition');
-      let suggestedFilename = "download"; // Default filename
+      let suggestedFilename = "download";
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
         if (filenameMatch && filenameMatch.length > 1) {
-            suggestedFilename = filenameMatch[1];
+          suggestedFilename = filenameMatch[1];
         }
       }
-      // Store the blob URL and the suggested filename
+
       const url = window.URL.createObjectURL(blob);
-      setDownloadUrl({ url, filename: suggestedFilename }); // Store URL and filename
-      // --- End CHANGE 3 ---
+      setDownloadInfo({ url, filename: suggestedFilename });
 
-
-      setToastMessage("File processed successfully! Click Download.")
-      setToastColor("success")
-      setShowToast(true)
-      // Optionally clear files after successful processing
-      // setFiles([]);
+      setToastMessage("File processed successfully! Click Download.");
+      setToastColor("success");
+      setShowToast(true);
+      // Optionally clear files: setFiles([]);
 
     } catch (error) {
-      console.error("Error during file processing:", error)
-      // Display the error message thrown from the fetch block or network error
-      setToastMessage(`Error: ${error.message}`)
-      setToastColor("danger")
-      setShowToast(true)
+      console.error("Error during file processing:", error);
+      setToastMessage(`Error: ${error.message}`);
+      setToastColor("danger");
+      setShowToast(true);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  // Modified to use the filename stored in state
   const handleDownload = () => {
-    if (!downloadUrl || !downloadUrl.url) return;
+    if (!downloadInfo || !downloadInfo.url) return;
 
     const link = document.createElement("a");
-    link.href = downloadUrl.url;
-
-    // Use the filename obtained from the Content-Disposition header
-    link.download = downloadUrl.filename;
-
+    link.href = downloadInfo.url;
+    link.download = downloadInfo.filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    // Optional: Revoke the object URL after download starts to free up memory
-    // setTimeout(() => window.URL.revokeObjectURL(downloadUrl.url), 100);
-    // setDownloadUrl(null); // Clear download state after clicking
+    // Optional: Revoke URL after a delay
+    // setTimeout(() => window.URL.revokeObjectURL(downloadInfo.url), 100);
+    // setDownloadInfo(null); // Clear download state after clicking
   };
 
-
   const clearFiles = () => {
-    setFiles([])
-    setDownloadUrl(null)
-    // Reset the file input visually - find the input and reset its value
+    setFiles([]);
+    setDownloadInfo(null);
     const fileInput = document.getElementById(`file-input-${endpoint}`);
     if (fileInput) {
-        fileInput.value = null;
+      fileInput.value = null;
     }
-  }
+  };
 
   return (
-    <IonCard>
-      <IonCardHeader>
-        <IonCardTitle>{title}</IonCardTitle>
+    // Add some margin if needed within parent container, e.g., className="mx-auto max-w-xl"
+    <IonCard className="m-0 shadow-md rounded-lg"> {/* Added shadow and rounding */}
+      <IonCardHeader className="pb-2"> {/* Reduced bottom padding */}
+        <IonCardTitle className="text-xl font-semibold text-gray-800">{title}</IonCardTitle>
       </IonCardHeader>
+
+      {/* Ensure IonCardContent wraps all the body content */}
       <IonCardContent>
-        <IonText color="medium">
-          <p>{instructions}</p>
+
+        <IonText color="medium"> {/* Use Ionic color or Tailwind text-gray-600 */}
+          <p className="text-sm mb-4 leading-relaxed">{instructions}</p>
         </IonText>
 
-        <div className="file-upload-container ion-padding-top">
+        <div className="file-upload-container space-y-4"> {/* Use Tailwind for vertical spacing */}
           <input
             type="file"
             id={`file-input-${endpoint}`}
             accept={acceptedFiles}
             multiple={multiple}
             onChange={handleFileChange}
-            style={{ display: "none" }} // Keep hidden, triggered by button
+            style={{ display: "none" }} // Keep hidden
+            disabled={isLoading}
           />
 
-          {/* Button to trigger the hidden file input */}
+          {/* Select File Button */}
           <IonButton
-             expand="block"
-             fill="outline"
-             onClick={() => document.getElementById(`file-input-${endpoint}`).click()}
-             disabled={isLoading}
-            >
+            expand="block"
+            fill="outline" // Outline style
+            onClick={() => document.getElementById(`file-input-${endpoint}`).click()}
+            disabled={isLoading}
+            className="py-2.5" // Tailwind for padding if needed, but Ionic sizing might be better
+          >
             <IonIcon slot="start" icon={cloudUploadOutline} />
             Select File{multiple ? "s" : ""}
           </IonButton>
 
-          {/* Display selected files */}
+          {/* Selected Files Display Area */}
           {files.length > 0 && (
-            <div className="selected-files ion-margin-top">
-              <IonItem lines="none" color="light" style={{ borderRadius: '8px' }}> {/* Added background and rounding */}
+            <div className="selected-files bg-gray-50 p-3 rounded-md border border-gray-200">
+              <IonItem lines="none" color="transparent"> {/* Transparent background for Item */}
                 <IonLabel>
-                  <h3 style={{ marginBottom: '5px', fontSize: '0.9em', fontWeight: 'bold' }}>Selected:</h3>
+                  <h3 className="mb-1 text-sm font-medium text-gray-700">Selected:</h3>
                   {files.map((file, index) => (
-                    <p key={index} style={{ fontSize: '0.85em', margin: '2px 0' }}>{file.name}</p>
+                    <p key={index} className="text-xs text-gray-900 truncate py-0.5"> {/* Truncate long names */}
+                      {file.name}
+                    </p>
                   ))}
                 </IonLabel>
                 {/* Clear Button */}
-                <IonButton fill="clear" color="medium" onClick={clearFiles} slot="end" disabled={isLoading}>
+                <IonButton
+                  fill="clear"
+                  color="medium" // Or "danger"
+                  onClick={clearFiles}
+                  slot="end"
+                  disabled={isLoading}
+                  className="mr-[-8px]" // Adjust spacing if needed
+                 >
                   <IonIcon icon={closeCircleOutline} />
                 </IonButton>
               </IonItem>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="action-buttons ion-margin-top">
-             {/* Process Button */}
+          {/* Action Buttons Area */}
+          <div className="action-buttons pt-2 space-y-3"> {/* Add top padding and space */}
+            {/* Process Button */}
             <IonButton
               expand="block"
               onClick={handleSubmit}
               disabled={isLoading || files.length === 0}
-              color="primary" // Use primary color for main action
+              color="primary"
+              className="font-medium text-base py-2.5" // Example: Tailwind font/size/padding adjustments
             >
-              {isLoading ? <IonSpinner name="dots" /> : `Process ${multiple ? "Files" : "File"}`}
+              {isLoading ? <IonSpinner name="dots" color="light" /> : `Process ${multiple ? "Files" : "File"}`}
             </IonButton>
 
-             {/* Download Button - Conditionally Rendered */}
-            {downloadUrl && (
+            {/* Download Button - Conditionally Rendered */}
+            {downloadInfo && (
               <IonButton
                 expand="block"
                 onClick={handleDownload}
                 color="success" // Use success color for download
-                className="ion-margin-top" // Add some space above
+                className="font-medium text-base py-2.5" // Example: Tailwind font/size/padding adjustments
               >
                 <IonIcon slot="start" icon={downloadOutline} />
                 Download Result
               </IonButton>
             )}
-          </div>
-        </div>
-      </IonCardContent>
+          </div> {/* Closing div for action-buttons */}
 
-      {/* Toast for notifications */}
+        </div> {/* Closing div for file-upload-container */}
+
+      </IonCardContent> {/* *** ENSURE THIS CLOSING TAG IS PRESENT *** */}
+
+      {/* Toast Notification */}
       <IonToast
         isOpen={showToast}
         onDidDismiss={() => setShowToast(false)}
         message={toastMessage}
-        duration={4000} // Slightly longer duration
+        duration={4000}
         color={toastColor}
-        position="bottom" // Position at the bottom
+        position="bottom"
       />
-    </IonCard>
-  )
-}
+    </IonCard> // Closing IonCard
+  ); // Closing return
+}; // Closing component function
 
-export default FileUploadCard
+export default FileUploadCard;
