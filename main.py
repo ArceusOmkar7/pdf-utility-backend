@@ -79,7 +79,15 @@ def convert_docx_to_pdf(input_path, output_path):
     if platform.system() == 'Windows':
         try:
             from docx2pdf import convert
-            convert(input_path, output_path)
+            import pythoncom
+
+            # Initialize COM for this thread
+            pythoncom.CoInitialize()
+            try:
+                convert(input_path, output_path)
+            finally:
+                # Make sure to uninitialize COM when done to prevent issues with subsequent conversions
+                pythoncom.CoUninitialize()
             return True
         except ImportError:
             logger.error(
