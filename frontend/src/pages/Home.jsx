@@ -51,36 +51,41 @@ const Home = () => {
         </IonToolbar>
       </IonHeader>
 
-      <IonContent fullscreen className={`ion-padding ${darkMode ? 'bg-[var(--black)] text-[var(--almond)]' : 'bg-[var(--almond)] text-[var(--black)]'}`}>
+      <IonContent fullscreen className={`ion-padding ${darkMode ? 'bg-gradient-to-br from-gray-900 to-black text-[var(--almond)]' : 'bg-gradient-to-br from-white to-gray-100 text-[var(--black)]'}`}>
 
-        {/* Welcome Card */}
-        <IonCard className={`mb-6 shadow-md rounded-2xl ${darkMode ? 'bg-[var(--gunmetal)] border border-[var(--walnut-brown)]' : 'bg-[var(--almond)] border border-[var(--khaki)]'}`}>
-          <IonCardHeader>
-            <IonCardTitle className={`text-2xl font-semibold ${darkMode ? 'text-[var(--almond)]' : 'text-[var(--black)]'}`}>Welcome to PDF Utility Tool</IonCardTitle>
-          </IonCardHeader>
-          <IonCardContent className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
-            <p>
-              This application provides various tools to work with PDF files. Select one of the tools below to get
-              started.
-            </p>
-          </IonCardContent>
-        </IonCard>
+        {/* Enhanced Welcome Section */}
+        <div className="relative mb-8">
+          <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: 'url(/assets/about-image.png)' }}></div>
+          <IonCard className={`relative z-10 mb-6 shadow-2xl rounded-3xl overflow-hidden ${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700' : 'bg-gradient-to-br from-white to-gray-100 border border-gray-300'}`}>
+            <IonCardHeader className="p-8">
+              <IonCardTitle className={`text-4xl font-extrabold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Welcome to PDF Utility Tool</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent className={`p-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className="text-lg leading-relaxed">
+                Simplify your PDF tasks with our powerful tools. Convert, merge, and create PDFs effortlessly.
+              </p>
+            </IonCardContent>
+          </IonCard>
+        </div>
 
-        {/* Grid for Tools */}
+        {/* Enhanced Grid for Tools */}
         <IonGrid>
-          <IonRow className="flex flex-nowrap overflow-x-auto space-x-4">
+          <IonRow className="flex flex-wrap justify-center gap-8">
             {tools.map((tool) => (
-              <IonCol size="auto" key={tool.path} className="flex-shrink-0">
+              <IonCol size="12" sizeMd="5" sizeLg="3" key={tool.path} className="flex-shrink-0">
                 <IonCard
                   routerLink={tool.path}
-                  className="h-40 md:h-48 bg-gradient-to-br from-zinc-800 to-zinc-700 text-white rounded-xl shadow-lg hover:shadow-2xl hover:scale-[1.05] transition-transform duration-300 flex flex-col items-center justify-center text-center cursor-pointer"
+                  className={`h-56 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-3xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-transform duration-300 flex flex-col items-center justify-center text-center cursor-pointer`}
                 >
                   <IonCardHeader>
-                    <div className="flex flex-col items-center space-y-2">
-                      <ion-icon icon={tool.icon} class="text-5xl text-sky-400"></ion-icon>
-                      <IonCardTitle className="text-lg font-semibold tracking-wide text-white">{tool.title}</IonCardTitle>
+                    <div className="flex flex-col items-center space-y-4">
+                      <ion-icon icon={tool.icon} class="text-6xl text-white"></ion-icon>
+                      <IonCardTitle className="text-xl font-bold tracking-wide text-white">{tool.title}</IonCardTitle>
                     </div>
                   </IonCardHeader>
+                  <IonCardContent className="text-sm text-gray-200">
+                    {tool.description}
+                  </IonCardContent>
                 </IonCard>
               </IonCol>
             ))}
