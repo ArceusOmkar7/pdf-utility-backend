@@ -12,6 +12,8 @@ import {
   IonGrid,
   IonRow,
   IonCol,
+  IonButtons,
+  IonMenuButton,
 } from "@ionic/react";
 import {
   documentTextOutline,
@@ -19,6 +21,7 @@ import {
   layersOutline,
   cloudDownloadOutline,
 } from "ionicons/icons";
+import aboutImage from "../assets/about-image.png"; // Import the image
 
 const About = () => { // Changed to a standard JavaScript function
   const imageStyle = {
@@ -41,25 +44,39 @@ const About = () => { // Changed to a standard JavaScript function
     <IonPage>
       <IonHeader>
         <IonToolbar color="primary">
+          <IonButtons slot="start">
+            <IonMenuButton />
+          </IonButtons>
           <IonTitle className="text-[var(--almond)] font-bold">About Us</IonTitle>
         </IonToolbar>
       </IonHeader>
 
       <IonContent fullscreen className="ion-padding bg-[var(--gunmetal)] text-[var(--almond)]">
+        {/* About PDF Utility Tool Section */}
+        <div style={{ textAlign: 'center', padding: '1rem' }}>
+          <h1>About PDF Utility Tool</h1>
+          <p>
+            PDF Utility Tool is a comprehensive solution for all your PDF-related needs. Our application provides a simple and intuitive interface to perform various operations on PDF files, making document management easier than ever.
+          </p>
+          <p>
+            Built with Ionic and React, this application offers a seamless experience across all devices, from desktops to mobile phones.
+          </p>
+        </div>
+
         {/* New Image Section (Centered) */}
         <div style={{ textAlign: 'center', padding: '1rem' }}>
           <img
-            src="../assets/about-image.png"  // Replace with the actual path
+            src={aboutImage} // Use the imported image
             alt="About Us"
-            style={{ maxWidth: '80%', height: 'auto' }} // Adjust as needed
+            style={{ maxWidth: '50%', height: 'auto' }} // Adjusted size to make the image smaller
           />
         </div>
 
-        {/* Text Content */}
+        {/* Text Content
         <div style={textStyle}>
           <p>We're a fully distributed team of 85 people living and working in 15 countries around the world. And we're working to build the best products to help our customers build their brands and grow their businesses on social media.</p>
           <p>We've always aimed to do things a little differently at Buffer. Since the early days, we've had a focus on building one of the most unique and fulfilling workplaces by rethinking a lot of traditional practices.</p>
-        </div>
+        </div> */}
 
         {/* Our Features Section */}
         <div style={featuresSectionStyle}>

@@ -32,6 +32,7 @@ const PdfToImages = () => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [presentToast] = useIonToast();
   const fileInputRef = useRef(null);
+  const [darkMode, setDarkMode] = useState(false); // Assuming darkMode state is defined
 
   // Constants specific to this conversion
   const acceptedFiles = ".pdf";
@@ -175,7 +176,7 @@ const PdfToImages = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar color="primary">
+        <IonToolbar color={darkMode ? "tertiary" : "primary"}>
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>

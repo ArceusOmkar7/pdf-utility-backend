@@ -48,6 +48,8 @@ const tabItems = [
   { title: "Home", tab: "home", path: "/home", icon: homeOutline },
   { title: "PDF->IMG", tab: "pdf-to-images", path: "/pdf-to-images", icon: imagesOutline },
   { title: "Word->PDF", tab: "word-to-pdf", path: "/word-to-pdf", icon: documentOutline },
+  { title: "IMG->PDF", tab: "images-to-pdf", path: "/images-to-pdf", icon: imageOutline },
+  { title: "MergePDFs", tab: "merge-pdfs", path: "/merge-pdfs", icon: layersOutline },
 ];
 
 // Define paths that would normally be under "More"
@@ -85,12 +87,6 @@ const AppContent = () => {
               <IonLabel>{item.title}</IonLabel>
             </IonTabButton>
           ))}
-
-          {/* More Tab - now it's just a visual indicator */}
-          <IonTabButton tab="more" selected={isMoreTabActive}>
-            <IonIcon icon={layersOutline} aria-hidden="true" />
-            <IonLabel>More</IonLabel>
-          </IonTabButton>
         </IonTabBar>
       </IonTabs>
     </>

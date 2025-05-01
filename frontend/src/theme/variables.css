@@ -99,6 +99,11 @@ body.dark {
   --ion-card-text-color: #ffffff;
 }
 
+/* Change the color of three lines (menu button) in dark theme to white */
+body.dark ion-menu-button {
+  --color: #f9f9f9;
+}
+
 /* Card styling */
 ion-card {
   background-color: var(--ion-card-background);
