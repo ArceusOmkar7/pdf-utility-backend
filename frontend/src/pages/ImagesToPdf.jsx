@@ -211,12 +211,12 @@ const ImagesToPdf = () => {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           style={{
-            border: `2px dashed ${isDraggingOver ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)'}`,
+            border: `2px dashed ${isDraggingOver ? 'var(--khaki)' : 'var(--walnut-brown)'}`,
             borderRadius: '8px',
             padding: '20px',
             textAlign: 'center',
             marginBottom: '20px',
-            backgroundColor: isDraggingOver ? 'rgba(var(--ion-color-primary-rgb), 0.1)' : 'transparent',
+            backgroundColor: isDraggingOver ? 'rgba(var(--khaki-rgb), 0.1)' : 'transparent',
             transition: 'border-color 0.3s ease, background-color 0.3s ease'
           }}
         >
