@@ -176,7 +176,7 @@ const PdfToImages = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar color={darkMode ? "tertiary" : "primary"}>
+        <IonToolbar style={{ backgroundColor: darkMode ? 'var(--ion-toolbar-background)' : 'var(--ion-background-color)', color: darkMode ? 'var(--ion-toolbar-color)' : 'var(--ion-text-color)' }}>
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
