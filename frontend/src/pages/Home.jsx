@@ -38,9 +38,9 @@ const Home = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar color={darkMode ? "dark" : "primary"}>
+        <IonToolbar style={{ backgroundColor: darkMode ? 'var(--ion-toolbar-background)' : 'var(--ion-background-color)', color: darkMode ? 'var(--ion-toolbar-color)' : 'var(--ion-text-color)' }}>
           <IonButtons slot="start">
-            <IonMenuButton color="light" />
+            <IonMenuButton />
           </IonButtons>
           <IonTitle className={`font-bold ${darkMode ? 'text-[var(--almond)]' : 'text-[var(--black)]'}`}>PDF Utility Tool</IonTitle>
           <IonButtons slot="end">
