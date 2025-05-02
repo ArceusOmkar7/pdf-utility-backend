@@ -29,6 +29,7 @@ const menuItems = [
     { title: "Word to PDF", path: "/word-to-pdf", icon: documentOutline },
     { title: "Images to PDF", path: "/images-to-pdf", icon: imageOutline },
     { title: "Merge PDFs", path: "/merge-pdfs", icon: layersOutline },
+    { title: "Test API", path: "/test-api", icon: informationCircleOutline }, // Added Test API link
 ];
 
 const Navigation = () => { // Or NavigationMenu if you prefer

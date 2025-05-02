@@ -1,4 +1,4 @@
-// frontend/src/App.jsx (Fixed structure)
+import React, { useState, createContext } from 'react';
 import {
   IonApp,
   IonRouterOutlet,
@@ -7,7 +7,14 @@ import {
   IonTabButton,
   IonIcon,
   IonLabel,
-  setupIonicReact
+  setupIonicReact,
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonInput,
+  IonButton
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route, useLocation } from "react-router-dom";
@@ -30,6 +37,7 @@ import PdfToImages from "./pages/PdfToImages";
 import WordToPdf from "./pages/WordToPdf";
 import ImagesToPdf from "./pages/ImagesToPdf";
 import MergePdfs from "./pages/MergePdfs";
+import TestApi from "./pages/TestApi";
 
 /* Components */
 import Navigation from "./components/Navigation";
@@ -43,6 +51,13 @@ import { homeOutline, informationCircleOutline, imagesOutline, layersOutline, do
 
 setupIonicReact();
 
+export const BackendContext = createContext({
+  backendUrl: 'http://localhost',
+  backendPort: '5000',
+  setBackendUrl: () => {},
+  setBackendPort: () => {},
+});
+
 // Define tab items
 const tabItems = [
   { title: "Home", tab: "home", path: "/home", icon: homeOutline },
@@ -50,6 +65,7 @@ const tabItems = [
   { title: "Word->PDF", tab: "word-to-pdf", path: "/word-to-pdf", icon: documentOutline },
   { title: "IMG->PDF", tab: "images-to-pdf", path: "/images-to-pdf", icon: imageOutline },
   { title: "MergePDFs", tab: "merge-pdfs", path: "/merge-pdfs", icon: layersOutline },
+  { title: "Test API", tab: "test-api", path: "/test-api", icon: informationCircleOutline },
 ];
 
 // Define paths that would normally be under "More"
@@ -74,6 +90,7 @@ const AppContent = () => {
           <Route exact path="/word-to-pdf" component={WordToPdf} />
           <Route exact path="/images-to-pdf" component={ImagesToPdf} />
           <Route exact path="/merge-pdfs" component={MergePdfs} />
+          <Route exact path="/test-api" component={TestApi} />
           <Route exact path="/">
             <Redirect to="/home" />
           </Route>
@@ -93,12 +110,51 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <IonApp>
-    <IonReactRouter>
-      <AppContent />
-    </IonReactRouter>
-  </IonApp>
-);
+const App = () => {
+  const [showModal, setShowModal] = useState(true);
+  const [backendUrl, setBackendUrl] = useState('http://localhost');
+  const [backendPort, setBackendPort] = useState('5000');
+
+  const backendContextValue = { backendUrl, backendPort, setBackendUrl, setBackendPort };
+
+  const handleSave = () => {
+    setShowModal(false);
+  };
+
+  return (
+    <BackendContext.Provider value={backendContextValue}>
+      <IonApp>
+        <IonReactRouter>
+          <AppContent />
+        </IonReactRouter>
+
+        <IonModal isOpen={showModal} backdropDismiss={false}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Enter Backend Details</IonTitle>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <IonLabel>Backend URL</IonLabel>
+            <IonInput
+              placeholder="Enter Backend URL (e.g., http://localhost)"
+              value={backendUrl}
+              onIonChange={(e) => setBackendUrl(e.detail.value)}
+            />
+            <IonLabel>Backend Port</IonLabel>
+            <IonInput
+              placeholder="Enter Backend Port (e.g., 5000)"
+              value={backendPort}
+              onIonChange={(e) => setBackendPort(e.detail.value)}
+            />
+            <IonButton expand="block" onClick={handleSave}>
+              Save
+            </IonButton>
+          </IonContent>
+        </IonModal>
+      </IonApp>
+    </BackendContext.Provider>
+  );
+};
 
 export default App;
