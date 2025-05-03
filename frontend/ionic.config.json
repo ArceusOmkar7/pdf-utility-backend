@@ -1,5 +1,5 @@
 {
   "name": ".",
   "integrations": {},
-  "type": "react"
+  "type": "react-vite"
 }
