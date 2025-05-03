@@ -78,14 +78,27 @@ def convert_docx_to_pdf(input_path, output_path):
 
     if platform.system() == 'Windows':
         try:
+            # Import and initialize COM for Windows
+            import pythoncom
+            pythoncom.CoInitialize()
+            
             from docx2pdf import convert
             convert(input_path, output_path)
+            
+            # Uninitialize COM when done
+            pythoncom.CoUninitialize()
             return True
-        except ImportError:
-            logger.error(
-                "docx2pdf package is missing. Install with: pip install docx2pdf")
-            raise Exception(
-                "Missing docx2pdf package. Please install it with 'pip install docx2pdf'")
+        except ImportError as import_err:
+            if 'pythoncom' in str(import_err):
+                logger.error(
+                    "pywin32/pythoncom package is missing. Install with: pip install pywin32")
+                raise Exception(
+                    "Missing pywin32 package. Please install it with 'pip install pywin32'")
+            else:
+                logger.error(
+                    "docx2pdf package is missing. Install with: pip install docx2pdf")
+                raise Exception(
+                    "Missing docx2pdf package. Please install it with 'pip install docx2pdf'")
         except Exception as e:
             logger.error(f"Windows conversion error: {str(e)}")
             raise Exception(f"Windows conversion error: {str(e)}")

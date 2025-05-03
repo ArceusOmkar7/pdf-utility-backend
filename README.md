@@ -9,7 +9,17 @@ This backend service provides PDF manipulation capabilities through a RESTful AP
 - Python 3.6 or higher
 - pip (Python package manager)
 - Poppler utils (for PDF to image conversion)
-- LibreOffice (for Word to PDF conversion on Linux/macOS) or Microsoft Word (for Windows)
+  - Linux: `sudo apt install poppler-utils`
+  - macOS: `brew install poppler`
+  - Windows: Download from [poppler releases](https://github.com/oschwartz10612/poppler-windows/releases/)
+- LibreOffice (for Word to PDF conversion on Linux/macOS) OR Microsoft Word (for Windows)
+- Python packages (installed via requirements.txt):
+  - flask, flask-cors: Web API framework
+  - pdf2image: PDF to image conversion (requires Poppler)
+  - docx2pdf: Word to PDF conversion on Windows (requires MS Word)
+  - PyPDF2: For PDF merging operations
+  - img2pdf: For combining images into PDFs
+  - pywin32: Windows-only dependency for COM operations with MS Office
 
 ### Platform-Specific Setup
 
