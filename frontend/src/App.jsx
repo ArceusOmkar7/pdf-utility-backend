@@ -1,4 +1,4 @@
-import React, { useState, createContext } from 'react';
+import React, { useState, createContext } from "react";
 import {
   IonApp,
   IonRouterOutlet,
@@ -14,7 +14,7 @@ import {
   IonTitle,
   IonContent,
   IonInput,
-  IonButton
+  IonButton,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route, useLocation } from "react-router-dom";
@@ -47,25 +47,69 @@ import "./theme/variables.css";
 import "./index.css";
 
 /* Icons for Tabs */
-import { homeOutline, informationCircleOutline, imagesOutline, layersOutline, documentOutline, imageOutline } from "ionicons/icons";
+import {
+  homeOutline,
+  informationCircleOutline,
+  imagesOutline,
+  layersOutline,
+  documentOutline,
+  imageOutline,
+  beakerOutline,
+} from "ionicons/icons";
 
 setupIonicReact();
 
 export const BackendContext = createContext({
-  backendUrl: 'http://localhost',
-  backendPort: '5000',
+  backendUrl: "http://localhost",
+  backendPort: "5000",
   setBackendUrl: () => {},
   setBackendPort: () => {},
 });
 
 // Define tab items
 const tabItems = [
-  { title: "Home", tab: "home", path: "/home", icon: homeOutline },
-  { title: "PDF->IMG", tab: "pdf-to-images", path: "/pdf-to-images", icon: imagesOutline },
-  { title: "Word->PDF", tab: "word-to-pdf", path: "/word-to-pdf", icon: documentOutline },
-  { title: "IMG->PDF", tab: "images-to-pdf", path: "/images-to-pdf", icon: imageOutline },
-  { title: "MergePDFs", tab: "merge-pdfs", path: "/merge-pdfs", icon: layersOutline },
-  { title: "Test API", tab: "test-api", path: "/test-api", icon: informationCircleOutline },
+  { 
+    title: "Home", 
+    tab: "home", 
+    path: "/home", 
+    icon: homeOutline,
+    color: "#3B82F6" // Blue color for home
+  },
+  {
+    title: "PDF→IMG",
+    tab: "pdf-to-images",
+    path: "/pdf-to-images",
+    icon: imagesOutline,
+    color: "#C084FC" // Purple color matching home page
+  },
+  {
+    title: "DOCX→PDF",
+    tab: "word-to-pdf",
+    path: "/word-to-pdf",
+    icon: documentOutline,
+    color: "#4ADE80" // Green color matching home page
+  },
+  {
+    title: "IMG→PDF",
+    tab: "images-to-pdf",
+    path: "/images-to-pdf",
+    icon: imageOutline,
+    color: "#F87171" // Red color matching home page
+  },
+  {
+    title: "Merge",
+    tab: "merge-pdfs",
+    path: "/merge-pdfs",
+    icon: layersOutline,
+    color: "#FBBF24" // Amber/yellow color matching home page
+  },
+  {
+    title: "API Test",
+    tab: "test-api",
+    path: "/test-api",
+    icon: beakerOutline,
+    color: "#38BDF8" // Cyan color for API Test
+  },
 ];
 
 // Define paths that would normally be under "More"
@@ -100,7 +144,7 @@ const AppContent = () => {
         <IonTabBar slot="bottom">
           {tabItems.map((item) => (
             <IonTabButton key={item.tab} tab={item.tab} href={item.path}>
-              <IonIcon icon={item.icon} aria-hidden="true" />
+              <IonIcon icon={item.icon} style={{ color: item.color }} aria-hidden="true" />
               <IonLabel>{item.title}</IonLabel>
             </IonTabButton>
           ))}
@@ -112,10 +156,15 @@ const AppContent = () => {
 
 const App = () => {
   const [showModal, setShowModal] = useState(true);
-  const [backendUrl, setBackendUrl] = useState('http://localhost');
-  const [backendPort, setBackendPort] = useState('5000');
+  const [backendUrl, setBackendUrl] = useState("http://localhost");
+  const [backendPort, setBackendPort] = useState("5000");
 
-  const backendContextValue = { backendUrl, backendPort, setBackendUrl, setBackendPort };
+  const backendContextValue = {
+    backendUrl,
+    backendPort,
+    setBackendUrl,
+    setBackendPort,
+  };
 
   const handleSave = () => {
     setShowModal(false);

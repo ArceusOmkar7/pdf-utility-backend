@@ -1,6 +1,24 @@
 import React, { useContext, useState } from 'react';
 import { BackendContext } from '../App';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonLabel, IonSelect, IonSelectOption, IonTextarea, IonCard, IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/react';
+import { 
+  IonPage, 
+  IonHeader, 
+  IonToolbar, 
+  IonTitle, 
+  IonContent, 
+  IonButton, 
+  IonInput, 
+  IonLabel, 
+  IonSelect, 
+  IonSelectOption, 
+  IonTextarea, 
+  IonCard, 
+  IonCardHeader, 
+  IonCardTitle, 
+  IonCardContent, 
+  IonButtons, 
+  IonMenuButton 
+} from '@ionic/react';
 
 const endpoints = [
   { label: 'API Info (GET /)', method: 'GET', path: '/' },
@@ -50,6 +68,9 @@ const TestApi = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
+          <IonButtons slot="start">
+            <IonMenuButton />
+          </IonButtons>
           <IonTitle>Test API</IonTitle>
         </IonToolbar>
       </IonHeader>

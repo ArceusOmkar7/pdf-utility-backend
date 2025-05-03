@@ -175,7 +175,16 @@ const MergePdfs = () => {
           <IonTitle>Merge PDFs</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent fullscreen className="ion-padding">
+      <IonContent fullscreen className="p-4 md:p-6">
+        {/* New Title and Description Section */}
+        <div className="mb-6 animate-slide-up">
+          <h1 className="text-2xl font-bold mb-2 text-center">Merge PDF Files</h1>
+          <p className="text-center text-gray-600 mb-4">
+            Combine multiple PDF documents into a single file. 
+            Upload and arrange your PDFs in the desired order, then merge them with a single click.
+          </p>
+          <div className="w-16 h-1 bg-primary mx-auto mb-6"></div>
+        </div>
 
         {/* Hidden file input element */}
         <input
@@ -194,17 +203,20 @@ const MergePdfs = () => {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           style={{
-            border: `2px dashed ${isDraggingOver ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)'}`, // Dynamic border color
+            border: `2px dashed ${isDraggingOver ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)'}`,
             borderRadius: '8px',
             padding: '20px',
             textAlign: 'center',
+            marginTop: '20px',
             marginBottom: '20px',
-            backgroundColor: isDraggingOver ? 'rgba(var(--ion-color-primary-rgb), 0.1)' : 'transparent', // Subtle background on hover
-            transition: 'border-color 0.3s ease, background-color 0.3s ease' // Smooth transition
+            backgroundColor: isDraggingOver ? 'rgba(var(--ion-color-primary-rgb), 0.1)' : 'transparent',
+            transition: 'border-color 0.3s ease, background-color 0.3s ease',
+            cursor: 'pointer'
           }}
+          onClick={!isLoading ? handleSelectFilesClick : undefined}
         >
           <IonIcon
-            icon={isDraggingOver ? cloudDownloadOutline : cloudUploadOutline} // Change icon on drag over
+            icon={isDraggingOver ? cloudDownloadOutline : cloudUploadOutline}
             style={{ fontSize: '48px', marginBottom: '10px', color: isDraggingOver ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)'}}
             aria-hidden="true"
            />
@@ -213,15 +225,13 @@ const MergePdfs = () => {
             <p style={{fontSize: 'smaller', margin: '5px 0'}}>or</p>
           </IonText>
           {/* Button to trigger the hidden file input */}
-          <IonButton fill="outline" onClick={handleSelectFilesClick} disabled={isLoading}>
-            Select Files From Computer
+          <IonButton fill="clear" onClick={handleSelectFilesClick} disabled={isLoading} size="small">
+            Click to Select File(s)
           </IonButton>
           <IonText color="medium" style={{display: 'block', fontSize: 'smaller', marginTop: '10px'}}>
             (Combine multiple PDFs into one)
           </IonText>
         </div>
-        {/* --- End Drop Zone --- */}
-
 
         {/* List of selected files (unchanged) */}
         {selectedFiles.length > 0 && (

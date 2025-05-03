@@ -184,6 +184,15 @@ const PdfToImages = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen className="p-4 md:p-6">
+        {/* New Title and Description Section */}
+        <div className="mb-6 animate-slide-up">
+          <h1 className="text-2xl font-bold mb-2 text-center">PDF to Images Conversion</h1>
+          <p className="text-center text-gray-600 mb-4">
+            Convert each page of your PDF documents into high-quality JPG images. 
+            Upload multiple PDFs and download them as a convenient zip archive.
+          </p>
+          <div className="w-16 h-1 bg-primary mx-auto mb-6"></div>
+        </div>
 
         {/* --- CHANGE: Hidden input allows MULTIPLE --- */}
         <input
@@ -194,7 +203,6 @@ const PdfToImages = () => {
           onChange={handleFileChange}
           style={{ display: 'none' }}
         />
-        {/* --- END CHANGE --- */}
 
         {/* Drop Zone Area (largely unchanged, handles multiple drop) */}
         <div
