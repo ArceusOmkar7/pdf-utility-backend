@@ -18,6 +18,7 @@ import {
   IonText,
   IonNote,
   IonSpinner,
+  IonProgressBar,
   useIonToast,
 } from "@ionic/react";
 // Import relevant icons
@@ -36,6 +37,8 @@ const WordToPdf = () => {
   // --- END CHANGE ---
   const [isLoading, setIsLoading] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [progress, setProgress] = useState(0); // Add progress state
+  const [progressText, setProgressText] = useState(""); // Add progress text state
   const [presentToast] = useIonToast();
   const fileInputRef = useRef(null);
 
@@ -161,6 +164,70 @@ const WordToPdf = () => {
   };
   // --- END CHANGE ---
 
+  // Function to handle fetch with progress tracking
+  const fetchWithProgress = (url, options, onProgress) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(options.method || "GET", url);
+
+      // Listen for progress events
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round(
+            (event.loaded / event.total) * 100
+          );
+          onProgress(percentComplete, "Uploading Word documents...");
+        }
+      });
+
+      xhr.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round(
+            (event.loaded / event.total) * 100
+          );
+          onProgress(percentComplete, "Processing...");
+        }
+      });
+
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const response = {
+            ok: true,
+            status: xhr.status,
+            headers: {
+              get: (name) => xhr.getResponseHeader(name),
+            },
+            blob: () => Promise.resolve(xhr.response),
+          };
+          resolve(response);
+        } else {
+          reject(new Error(`HTTP error! status: ${xhr.status}`));
+        }
+      });
+
+      xhr.addEventListener("error", () => {
+        reject(new Error("Network error"));
+      });
+
+      xhr.addEventListener("abort", () => {
+        reject(new Error("Request aborted"));
+      });
+
+      // Set headers
+      if (options.headers) {
+        Object.keys(options.headers).forEach((key) => {
+          xhr.setRequestHeader(key, options.headers[key]);
+        });
+      }
+
+      // Handle response as blob
+      xhr.responseType = "blob";
+
+      // Send the request
+      xhr.send(options.body);
+    });
+  };
+
   // --- Submit Handler (Adjusted for Multiple Word to PDF) ---
   // --- ASSUMES BACKEND WILL BE UPDATED to return a ZIP ---
   const handleConvertSubmit = async () => {
@@ -176,6 +243,8 @@ const WordToPdf = () => {
     // --- END CHANGE ---
 
     setIsLoading(true);
+    setProgress(0);
+    setProgressText('Preparing...');
     const formData = new FormData();
 
     // --- CHANGE: Append all files using the backend key ('files' assuming backend update) ---
@@ -186,10 +255,17 @@ const WordToPdf = () => {
 
     try {
       // Endpoint remains /word-to-pdf, but backend needs update to handle multiple files
-      const response = await fetch(backendEndpoint, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetchWithProgress(
+        backendEndpoint,
+        {
+          method: "POST",
+          body: formData,
+        },
+        (percentComplete, statusText) => {
+          setProgress(percentComplete);
+          setProgressText(statusText);
+        }
+      );
 
       if (!response.ok) {
         let errorMsg = `HTTP error! status: ${response.status}`;
@@ -245,6 +321,8 @@ const WordToPdf = () => {
       });
       // --- END CHANGE ---
       setSelectedFiles([]); // Clear list on success
+      setProgress(0);
+      setProgressText('');
     } catch (error) {
       console.error("Error converting Word to PDF:", error);
       presentToast({
@@ -418,6 +496,17 @@ const WordToPdf = () => {
           </>
         )}
         {/* --- END CHANGE --- */}
+
+        {/* Progress Bar */}
+        {isLoading && (
+          <div className="mt-4">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm font-medium text-blue-700 dark:text-white">{progressText}</span>
+              <span className="text-sm font-medium text-blue-700 dark:text-white">{progress}%</span>
+            </div>
+            <IonProgressBar value={progress / 100} color="primary" style={{ height: '8px', borderRadius: '4px' }}></IonProgressBar>
+          </div>
+        )}
       </IonContent>
     </IonPage>
   );

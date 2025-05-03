@@ -17,6 +17,7 @@ import {
   IonText,
   IonNote,
   IonSpinner,
+  IonProgressBar,
   useIonToast
 } from "@ionic/react";
 // Import different icons for visual feedback
@@ -27,8 +28,70 @@ const MergePdfs = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState(false); // State for drop zone highlight
+  const [progress, setProgress] = useState(0); // Add progress state
+  const [progressText, setProgressText] = useState(''); // Add progress text state
   const [presentToast] = useIonToast();
   const fileInputRef = useRef(null);
+
+  // Function to handle fetch with progress tracking
+  const fetchWithProgress = (url, options, onProgress) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(options.method || 'GET', url);
+      
+      // Listen for progress events
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          onProgress(percentComplete, 'Uploading PDF files...');
+        }
+      });
+
+      xhr.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          onProgress(percentComplete, 'Merging PDFs...');
+        }
+      });
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const response = {
+            ok: true,
+            status: xhr.status,
+            headers: {
+              get: (name) => xhr.getResponseHeader(name)
+            },
+            blob: () => Promise.resolve(xhr.response)
+          };
+          resolve(response);
+        } else {
+          reject(new Error(`HTTP error! status: ${xhr.status}`));
+        }
+      });
+
+      xhr.addEventListener('error', () => {
+        reject(new Error('Network error'));
+      });
+
+      xhr.addEventListener('abort', () => {
+        reject(new Error('Request aborted'));
+      });
+
+      // Set headers
+      if (options.headers) {
+        Object.keys(options.headers).forEach(key => {
+          xhr.setRequestHeader(key, options.headers[key]);
+        });
+      }
+
+      // Handle response as blob
+      xhr.responseType = 'blob';
+
+      // Send the request
+      xhr.send(options.body);
+    });
+  };
 
   // --- Drag and Drop Handlers ---
 
@@ -125,6 +188,8 @@ const MergePdfs = () => {
       return;
     }
     setIsLoading(true);
+    setProgress(0);
+    setProgressText('Preparing...');
     const formData = new FormData();
     selectedFiles.forEach((file) => {
       formData.append('files', file);
@@ -132,10 +197,18 @@ const MergePdfs = () => {
 
     try {
       // Using the absolute URL that works for you
-      const response = await fetch('http://localhost:5000/api/merge-pdfs', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetchWithProgress(
+        'http://localhost:5000/api/merge-pdfs',
+        {
+          method: 'POST',
+          body: formData,
+        },
+        (percentComplete, statusText) => {
+          setProgress(percentComplete);
+          setProgressText(statusText);
+        }
+      );
+      
       if (!response.ok) {
         let errorMsg = `HTTP error! status: ${response.status}`;
         try { const errData = await response.json(); errorMsg = errData.error || errorMsg; } catch (e) {}
@@ -156,6 +229,8 @@ const MergePdfs = () => {
       window.URL.revokeObjectURL(downloadUrl); a.remove();
       presentToast({ message: 'Files merged successfully!', duration: 3000, color: 'success' });
       setSelectedFiles([]);
+      setProgress(0);
+      setProgressText('');
     } catch (error) {
       console.error('Error merging files:', error);
       presentToast({ message: `Error merging files: ${error?.message || 'Please try again.'}`, duration: 4000, color: 'danger' });
@@ -273,9 +348,16 @@ const MergePdfs = () => {
           </>
         )}
 
-         {/* Placeholder when no files selected (optional, as dropzone text covers this) */}
-         {/* {selectedFiles.length === 0 && !isLoading && ( ... )} */}
-
+        {/* Progress Bar */}
+        {isLoading && (
+          <div className="mt-4">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm font-medium text-blue-700 dark:text-white">{progressText}</span>
+              <span className="text-sm font-medium text-blue-700 dark:text-white">{progress}%</span>
+            </div>
+            <IonProgressBar value={progress / 100} color="primary" style={{ height: '8px', borderRadius: '4px' }}></IonProgressBar>
+          </div>
+        )}
       </IonContent>
     </IonPage>
   );
